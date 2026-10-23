@@ -1,8 +1,7 @@
 # CoherenceProbe 🔍
 
-[![CI](https://github.com/ccrngd1/ProtoGensis/actions/workflows/CI/badge.svg)](https://github.com/ccrngd1/ProtoGensis/actions)
-[![PyPI](https://img.shields.io/pypi/v/coherenceprobe.svg)](https://pypi.org/project/coherenceprobe/)
-[![Python](https://img.shields.io/pypi/pyversions/coherenceprobe.svg)](https://pypi.org/project/coherenceprobe/)
+[![CI](https://github.com/ccrngd1/coherenceprobe/actions/workflows/ci.yml/badge.svg)](https://github.com/ccrngd1/coherenceprobe/actions)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://github.com/ccrngd1/coherenceprobe)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **Detect logical contradictions across multi-agent AI pipeline outputs — without needing ground truth.**
@@ -14,8 +13,8 @@ Research shows 33-94% of multi-agent compositions contain hidden contradictions 
 ## ⚡ Quick Start
 
 ```bash
-# Install
-pip install coherenceprobe
+# Install (not yet on PyPI — install from source)
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe && pip install -e .
 
 # Basic usage
 from coherenceprobe import check, LogCapture
@@ -47,30 +46,34 @@ print(f"Contradictions found: {len(report.contradictions)}")
 
 ## 🚀 Installation
 
+CoherenceProbe is not yet published to PyPI — install from source:
+
 ### Basic Installation
 
 ```bash
-pip install coherenceprobe
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe
+pip install -e .
 ```
 
 ### Local Mode (no API calls)
 
 ```bash
-pip install coherenceprobe[local]
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe
+pip install -e ".[local]"
 python -m spacy download en_core_web_sm
 ```
 
 ### With Visualization
 
 ```bash
-pip install coherenceprobe[viz]
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe
+pip install -e ".[viz]"
 ```
 
 ### Development
 
 ```bash
-git clone https://github.com/ccrngd1/ProtoGensis.git && cd ProtoGensis/coherenceprobe
-cd coherenceprobe
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe
 pip install -e ".[dev]"
 pytest
 ```
@@ -430,9 +433,8 @@ MIT License - see [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- **Documentation**: [GitHub README](https://github.com/ccrngd1/ProtoGensis/tree/main/coherenceprobe)
-- **PyPI**: [https://pypi.org/project/coherenceprobe/](https://pypi.org/project/coherenceprobe/)
-- **Issues**: [GitHub Issues](https://github.com/ccrngd1/ProtoGensis/issues)
+- **Documentation**: [GitHub README](https://github.com/ccrngd1/coherenceprobe#readme)
+- **Issues**: [GitHub Issues](https://github.com/ccrngd1/coherenceprobe/issues)
 - **Blog Post**: See [BLOG.md](BLOG.md) for detailed writeup
 
 ---
@@ -446,7 +448,7 @@ If you use CoherenceProbe in your research, please cite:
   title={CoherenceProbe: Contradiction Detection for Multi-Agent AI Pipelines},
   author={CoherenceProbe Contributors},
   year={2026},
-  url={https://github.com/ccrngd1/ProtoGensis/tree/main/coherenceprobe}
+  url={https://github.com/ccrngd1/coherenceprobe}
 }
 ```
 

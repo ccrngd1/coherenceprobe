@@ -1,9 +1,12 @@
 # Installation Guide
 
+CoherenceProbe is not yet published to PyPI — install from source.
+
 ## Quick Install
 
 ```bash
-pip install coherenceprobe
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe
+pip install -e .
 ```
 
 ## Local Mode (No API Calls)
@@ -11,21 +14,22 @@ pip install coherenceprobe
 For fully local operation with spaCy-based claim extraction:
 
 ```bash
-pip install coherenceprobe[local]
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe
+pip install -e ".[local]"
 python -m spacy download en_core_web_sm
 ```
 
 ## With Visualization
 
 ```bash
-pip install coherenceprobe[viz]
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe
+pip install -e ".[viz]"
 ```
 
 ## Development Setup
 
 ```bash
-git clone https://github.com/ccrngd1/ProtoGensis.git && cd ProtoGensis/coherenceprobe
-cd coherenceprobe
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe
 pip install -e ".[dev,local,viz]"
 python -m spacy download en_core_web_sm
 pytest
@@ -77,7 +81,7 @@ pip install --upgrade sentence-transformers torch
 
 ## System Requirements
 
-- **Python**: 3.9+
+- **Python**: 3.10+
 - **OS**: Linux, macOS, Windows
 - **Memory**: 2GB+ RAM recommended (for NLI models)
 - **Storage**: ~1GB for models (sentence-transformers + spaCy)
@@ -159,7 +163,10 @@ For containerized deployment:
 ```dockerfile
 FROM python:3.11-slim
 
-RUN pip install coherenceprobe[local]
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+RUN git clone https://github.com/ccrngd1/coherenceprobe.git /opt/coherenceprobe \
+    && pip install -e "/opt/coherenceprobe[local]"
 RUN python -m spacy download en_core_web_sm
 
 WORKDIR /app
@@ -177,7 +184,8 @@ CMD ["coherenceprobe", "check", "outputs.jsonl", "--local"]
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install coherenceprobe[local]
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe
+pip install -e ".[local]"
 ```
 
 ### Issue: Slow model downloads
@@ -223,13 +231,14 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu
 
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install coherenceprobe[local]
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe
+pip install -e ".[local]"
 ```
 
 ## Getting Help
 
 - **Documentation**: [README.md](README.md)
-- **Issues**: [GitHub Issues](https://github.com/ccrngd1/ProtoGensis/issues)
+- **Issues**: [GitHub Issues](https://github.com/ccrngd1/coherenceprobe/issues)
 - **Blog Post**: [BLOG.md](BLOG.md)
 
 ---

@@ -156,7 +156,8 @@ By default, CoherenceProbe uses an LLM for claim extraction (any model litellm s
 There's also a fully local mode: spaCy for claim extraction, sentence-transformers for embeddings, DeBERTa for NLI. No API calls, no data leaving your machine. I use local mode in CI because it's faster and doesn't burn API credits. It's also the right choice for sensitive data or air-gapped environments.
 
 ```bash
-pip install coherenceprobe[local]
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe
+pip install -e ".[local]"
 python -m spacy download en_core_web_sm
 coherenceprobe check outputs.jsonl --local
 ```
@@ -184,7 +185,7 @@ The deeper point: coherence testing doesn't replace good pipeline architecture. 
 ## Getting Started
 
 ```bash
-pip install coherenceprobe
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe && pip install -e .
 ```
 
 ```python
@@ -200,8 +201,7 @@ print(report.score)  # Low score = contradiction detected
 ```
 
 **Resources:**
-- GitHub: https://github.com/ccrngd1/ProtoGensis/tree/main/coherenceprobe
-- PyPI: https://pypi.org/project/coherenceprobe/
+- GitHub: https://github.com/ccrngd1/coherenceprobe
 
 ---
 
@@ -218,7 +218,7 @@ CoherenceProbe makes this automatic, fast, and practical.
 Because the worst bugs aren't the ones where your system is wrong. They're the ones where your system tells users two different truths, and you never notice until it's too late.
 
 ```bash
-pip install coherenceprobe
+git clone https://github.com/ccrngd1/coherenceprobe.git && cd coherenceprobe && pip install -e .
 coherenceprobe check your_outputs.jsonl
 ```
 
@@ -226,4 +226,4 @@ coherenceprobe check your_outputs.jsonl
 
 *Have you run into contradictions in your own multi-agent pipelines? What's your testing strategy? I'd love to hear what you've tried.*
 
-*GitHub: https://github.com/ccrngd1/ProtoGensis/tree/main/coherenceprobe*
+*GitHub: https://github.com/ccrngd1/coherenceprobe*
