@@ -19,3 +19,7 @@ dist/
 .env.*
 *.pem
 .DS_Store
+
+.coverage
+coverage.xml
+htmlcov/
