@@ -1,16 +1,14 @@
 """Contradiction detection using NLI and semantic clustering."""
 
-import numpy as np
-from typing import Optional
 from itertools import combinations
+from typing import Literal
 
-from .models import Claim, ContradictionPair, CoherenceConfig
+import numpy as np
+
+from .models import Claim, CoherenceConfig, ContradictionPair
 
 
-def detect_contradictions(
-    claims: list[Claim],
-    config: CoherenceConfig
-) -> list[ContradictionPair]:
+def detect_contradictions(claims: list[Claim], config: CoherenceConfig) -> list[ContradictionPair]:
     """Detect contradictions among claims using NLI and clustering.
 
     Pipeline:
@@ -60,9 +58,7 @@ def detect_contradictions(
             print(f"Checking {len(cross_agent_pairs)} cross-agent pairs in cluster")
 
         for claim_a, claim_b in cross_agent_pairs:
-            contradiction = _check_contradiction_nli(
-                claim_a, claim_b, nli_model, config
-            )
+            contradiction = _check_contradiction_nli(claim_a, claim_b, nli_model, config)
             if contradiction:
                 contradictions.append(contradiction)
 
@@ -86,8 +82,7 @@ def _embed_claims(claims: list[Claim], config: CoherenceConfig) -> np.ndarray:
         from sentence_transformers import SentenceTransformer
     except ImportError:
         raise ImportError(
-            "sentence-transformers is required. "
-            "Install with: pip install sentence-transformers"
+            "sentence-transformers is required. " "Install with: pip install sentence-transformers"
         )
 
     model = SentenceTransformer(config.embedding_model)
@@ -100,9 +95,7 @@ def _embed_claims(claims: list[Claim], config: CoherenceConfig) -> np.ndarray:
 
 
 def _cluster_claims(
-    claims: list[Claim],
-    embeddings: np.ndarray,
-    similarity_threshold: float = 0.6
+    claims: list[Claim], embeddings: np.ndarray, similarity_threshold: float = 0.6
 ) -> list[list[int]]:
     """Cluster claims by semantic similarity using cosine similarity.
 
@@ -161,8 +154,7 @@ def _load_nli_model(config: CoherenceConfig):
         from sentence_transformers import CrossEncoder
     except ImportError:
         raise ImportError(
-            "sentence-transformers is required. "
-            "Install with: pip install sentence-transformers"
+            "sentence-transformers is required. " "Install with: pip install sentence-transformers"
         )
 
     model = CrossEncoder(config.nli_model)
@@ -170,11 +162,8 @@ def _load_nli_model(config: CoherenceConfig):
 
 
 def _check_contradiction_nli(
-    claim_a: Claim,
-    claim_b: Claim,
-    nli_model,
-    config: CoherenceConfig
-) -> Optional[ContradictionPair]:
+    claim_a: Claim, claim_b: Claim, nli_model, config: CoherenceConfig
+) -> ContradictionPair | None:
     """Check if two claims contradict using NLI model.
 
     Args:
@@ -194,11 +183,11 @@ def _check_contradiction_nli(
     # [contradiction_score, entailment_score, neutral_score]
     # The cross-encoder may return raw logits; apply softmax to get probabilities
     import numpy as np
+
     raw = np.array([scores[0][0], scores[0][1], scores[0][2]], dtype=float)
     exp_raw = np.exp(raw - raw.max())  # numerically stable softmax
     probs = exp_raw / exp_raw.sum()
     contradiction_score = float(probs[0])
-    entailment_score = float(probs[1])
     neutral_score = float(probs[2])
 
     # Check if contradiction score exceeds threshold
@@ -216,13 +205,15 @@ def _check_contradiction_nli(
             claim_b=claim_b,
             contradiction_type=contradiction_type,
             confidence=contradiction_score,
-            explanation=explanation
+            explanation=explanation,
         )
 
     return None
 
 
-def _classify_contradiction_type(claim_a: Claim, claim_b: Claim) -> str:
+def _classify_contradiction_type(
+    claim_a: Claim, claim_b: Claim
+) -> Literal["logical", "factual", "temporal"]:
     """Classify the type of contradiction between two claims.
 
     Args:
@@ -236,7 +227,18 @@ def _classify_contradiction_type(claim_a: Claim, claim_b: Claim) -> str:
     text_b = claim_b.normalized.lower()
 
     # Check for logical contradictions (negation patterns)
-    negation_words = ["not", "no", "never", "none", "isn't", "aren't", "won't", "can't", "don't", "doesn't"]
+    negation_words = [
+        "not",
+        "no",
+        "never",
+        "none",
+        "isn't",
+        "aren't",
+        "won't",
+        "can't",
+        "don't",
+        "doesn't",
+    ]
     has_negation_a = any(word in text_a for word in negation_words)
     has_negation_b = any(word in text_b for word in negation_words)
 
@@ -245,8 +247,21 @@ def _classify_contradiction_type(claim_a: Claim, claim_b: Claim) -> str:
         return "logical"
 
     # Check for temporal contradictions
-    temporal_words = ["before", "after", "when", "while", "during", "until", "since",
-                     "first", "then", "next", "finally", "previously", "later"]
+    temporal_words = [
+        "before",
+        "after",
+        "when",
+        "while",
+        "during",
+        "until",
+        "since",
+        "first",
+        "then",
+        "next",
+        "finally",
+        "previously",
+        "later",
+    ]
     has_temporal_a = any(word in text_a for word in temporal_words)
     has_temporal_b = any(word in text_b for word in temporal_words)
 
@@ -257,11 +272,7 @@ def _classify_contradiction_type(claim_a: Claim, claim_b: Claim) -> str:
     return "factual"
 
 
-def _generate_explanation_llm(
-    claim_a: Claim,
-    claim_b: Claim,
-    config: CoherenceConfig
-) -> str:
+def _generate_explanation_llm(claim_a: Claim, claim_b: Claim, config: CoherenceConfig) -> str:
     """Generate human-readable explanation for contradiction using LLM.
 
     Args:
@@ -285,24 +296,26 @@ Explanation:"""
         response = litellm.completion(
             model=config.model,
             messages=[
-                {"role": "system", "content": "You are an expert at analyzing logical contradictions."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": "You are an expert at analyzing logical contradictions.",
+                },
+                {"role": "user", "content": prompt},
             ],
             temperature=0.3,
             max_tokens=100,
         )
 
-        return response.choices[0].message.content.strip()
+        return str(response.choices[0].message.content).strip()
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - best-effort: LLM failure degrades gracefully
         if config.verbose:
             print(f"Failed to generate explanation: {e}")
         return ""
 
 
 async def adetect_contradictions(
-    claims: list[Claim],
-    config: CoherenceConfig
+    claims: list[Claim], config: CoherenceConfig
 ) -> list[ContradictionPair]:
     """Async version of detect_contradictions.
 

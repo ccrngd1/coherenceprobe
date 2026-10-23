@@ -1,9 +1,9 @@
 """Tests for CLI functionality."""
 
+import json
+
 import pytest
 from click.testing import CliRunner
-from pathlib import Path
-import json
 
 from coherenceprobe.cli import main
 from coherenceprobe.models import AgentOutput
@@ -26,20 +26,19 @@ def sample_jsonl(tmp_path):
             timestamp="2026-01-01T00:00:00Z",
             input="test",
             output="The server runs on port 8080.",
-            metadata={}
+            metadata={},
         ),
         AgentOutput(
             agent="agent2",
             timestamp="2026-01-01T00:00:01Z",
             input="test",
             output="The server is operational.",
-            metadata={}
+            metadata={},
         ),
     ]
 
     with open(file_path, "w") as f:
-        for output in outputs:
-            f.write(output.model_dump_json() + "\n")
+        f.writelines(output.model_dump_json() + "\n" for output in outputs)
 
     return file_path
 
@@ -120,12 +119,7 @@ def test_cli_check_jsonl_local(runner, sample_jsonl):
     """Test check command with JSONL in local mode."""
     pytest.importorskip("spacy")
 
-    result = runner.invoke(main, [
-        "check",
-        str(sample_jsonl),
-        "--local",
-        "--format", "text"
-    ])
+    result = runner.invoke(main, ["check", str(sample_jsonl), "--local", "--format", "text"])
 
     # May succeed or fail depending on if spaCy model is installed
     # But should not crash
@@ -136,12 +130,7 @@ def test_cli_check_directory_local(runner, sample_directory):
     """Test check command with directory in local mode."""
     pytest.importorskip("spacy")
 
-    result = runner.invoke(main, [
-        "check",
-        str(sample_directory),
-        "--local",
-        "--format", "text"
-    ])
+    result = runner.invoke(main, ["check", str(sample_directory), "--local", "--format", "text"])
 
     # Should produce output or error
     assert "COHERENCE" in result.output or "Error" in result.output
@@ -153,13 +142,10 @@ def test_cli_check_json_format(runner, sample_jsonl, tmp_path):
 
     output_file = tmp_path / "report.json"
 
-    result = runner.invoke(main, [
-        "check",
-        str(sample_jsonl),
-        "--local",
-        "--format", "json",
-        "--output", str(output_file)
-    ])
+    result = runner.invoke(
+        main,
+        ["check", str(sample_jsonl), "--local", "--format", "json", "--output", str(output_file)],
+    )
 
     if result.exit_code == 0:
         assert output_file.exists()
@@ -174,13 +160,10 @@ def test_cli_check_html_format(runner, sample_jsonl, tmp_path):
 
     output_file = tmp_path / "report.html"
 
-    result = runner.invoke(main, [
-        "check",
-        str(sample_jsonl),
-        "--local",
-        "--format", "html",
-        "--output", str(output_file)
-    ])
+    result = runner.invoke(
+        main,
+        ["check", str(sample_jsonl), "--local", "--format", "html", "--output", str(output_file)],
+    )
 
     if result.exit_code == 0:
         assert output_file.exists()
@@ -192,12 +175,7 @@ def test_cli_check_verbose(runner, sample_jsonl):
     """Test check command with verbose flag."""
     pytest.importorskip("spacy")
 
-    result = runner.invoke(main, [
-        "check",
-        str(sample_jsonl),
-        "--local",
-        "--verbose"
-    ])
+    result = runner.invoke(main, ["check", str(sample_jsonl), "--local", "--verbose"])
 
     # Verbose should include extra output
     if "Error" not in result.output:
@@ -208,12 +186,7 @@ def test_cli_check_threshold(runner, sample_jsonl):
     """Test check command with custom threshold."""
     pytest.importorskip("spacy")
 
-    result = runner.invoke(main, [
-        "check",
-        str(sample_jsonl),
-        "--local",
-        "--threshold", "0.5"
-    ])
+    result = runner.invoke(main, ["check", str(sample_jsonl), "--local", "--threshold", "0.5"])
 
     # Should run without error
     assert result.exit_code in [0, 1]  # May exit with 1 if contradictions found

@@ -2,45 +2,66 @@
 
 import sys
 from pathlib import Path
+
 import click
 
-from .models import CoherenceConfig
-from .capture import load_outputs_from_jsonl, load_outputs_from_directory
-from .extraction import extract_claims
+from .capture import load_outputs_from_directory, load_outputs_from_jsonl
 from .detection import detect_contradictions
-from .scoring import compute_coherence_score
+from .extraction import extract_claims
+from .models import CoherenceConfig
 from .reporting import format_report, save_report
+from .scoring import compute_coherence_score
 
 
 @click.group()
 @click.version_option(version="0.1.0")
 def main():
     """CoherenceProbe - Detect contradictions in multi-agent AI pipelines."""
-    pass
 
 
 @main.command()
-@click.argument('input_path', type=click.Path(exists=True))
-@click.option('--format', '-f', type=click.Choice(['json', 'text', 'html']), default='text',
-              help='Output format')
-@click.option('--output', '-o', type=click.Path(), default=None,
-              help='Output file path (default: stdout)')
-@click.option('--model', '-m', default='openai/gpt-4o-mini',
-              help='LiteLLM model for claim extraction')
-@click.option('--threshold', '-t', type=float, default=0.7,
-              help='NLI confidence threshold for contradictions (0.0-1.0)')
-@click.option('--local', is_flag=True,
-              help='Use fully local mode (spaCy extraction, no API calls)')
-@click.option('--nli-model', default='cross-encoder/nli-deberta-v3-large',
-              help='HuggingFace NLI model')
-@click.option('--embedding-model', default='all-MiniLM-L6-v2',
-              help='Sentence-transformers embedding model')
-@click.option('--adjudicate', is_flag=True,
-              help='Use LLM to explain ambiguous contradictions')
-@click.option('--verbose', '-v', is_flag=True,
-              help='Enable verbose output')
-def check(input_path, format, output, model, threshold, local, nli_model,
-         embedding_model, adjudicate, verbose):
+@click.argument("input_path", type=click.Path(exists=True))
+@click.option(
+    "--format",
+    "-f",
+    type=click.Choice(["json", "text", "html"]),
+    default="text",
+    help="Output format",
+)
+@click.option(
+    "--output", "-o", type=click.Path(), default=None, help="Output file path (default: stdout)"
+)
+@click.option(
+    "--model", "-m", default="openai/gpt-4o-mini", help="LiteLLM model for claim extraction"
+)
+@click.option(
+    "--threshold",
+    "-t",
+    type=float,
+    default=0.7,
+    help="NLI confidence threshold for contradictions (0.0-1.0)",
+)
+@click.option("--local", is_flag=True, help="Use fully local mode (spaCy extraction, no API calls)")
+@click.option(
+    "--nli-model", default="cross-encoder/nli-deberta-v3-large", help="HuggingFace NLI model"
+)
+@click.option(
+    "--embedding-model", default="all-MiniLM-L6-v2", help="Sentence-transformers embedding model"
+)
+@click.option("--adjudicate", is_flag=True, help="Use LLM to explain ambiguous contradictions")
+@click.option("--verbose", "-v", is_flag=True, help="Enable verbose output")
+def check(
+    input_path,
+    format,
+    output,
+    model,
+    threshold,
+    local,
+    nli_model,
+    embedding_model,
+    adjudicate,
+    verbose,
+):
     """Check coherence of agent outputs.
 
     INPUT_PATH can be:
@@ -77,7 +98,7 @@ def check(input_path, format, output, model, threshold, local, nli_model,
             nli_model=nli_model,
             embedding_model=embedding_model,
             adjudicate_ambiguous=adjudicate,
-            verbose=verbose
+            verbose=verbose,
         )
 
         # Extract claims
@@ -113,16 +134,17 @@ def check(input_path, format, output, model, threshold, local, nli_model,
         elif report.score < 0.8:
             sys.exit(0)  # Some issues but not critical
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - top-level CLI handler reports any error
         click.echo(f"Error: {e}", err=True)
         if verbose:
             import traceback
+
             traceback.print_exc()
         sys.exit(1)
 
 
 @main.command()
-@click.argument('output_path', type=click.Path())
+@click.argument("output_path", type=click.Path())
 def init(output_path):
     """Initialize a new capture file for collecting agent outputs.
 
@@ -130,9 +152,8 @@ def init(output_path):
     """
     output_path = Path(output_path)
 
-    if output_path.exists():
-        if not click.confirm(f"{output_path} already exists. Overwrite?"):
-            return
+    if output_path.exists() and not click.confirm(f"{output_path} already exists. Overwrite?"):
+        return
 
     # Create empty file
     output_path.write_text("")
@@ -161,7 +182,7 @@ def info():
 
 
 @main.command()
-@click.argument('input_path', type=click.Path(exists=True))
+@click.argument("input_path", type=click.Path(exists=True))
 def stats(input_path):
     """Show statistics about agent outputs without running full analysis."""
     try:
@@ -180,7 +201,7 @@ def stats(input_path):
             return
 
         # Compute statistics
-        agents = list(set(o.agent for o in outputs))
+        agents = list({o.agent for o in outputs})
         agents.sort()
 
         click.echo(f"Total outputs: {len(outputs)}")
@@ -189,6 +210,7 @@ def stats(input_path):
 
         click.echo("\nOutputs per agent:")
         from collections import Counter
+
         agent_counts = Counter(o.agent for o in outputs)
         for agent, count in sorted(agent_counts.items()):
             click.echo(f"  {agent}: {count}")
@@ -197,10 +219,10 @@ def stats(input_path):
         avg_length = sum(len(o.output) for o in outputs) / len(outputs)
         click.echo(f"\nAverage output length: {avg_length:.0f} characters")
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - top-level CLI handler reports any error
         click.echo(f"Error: {e}", err=True)
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

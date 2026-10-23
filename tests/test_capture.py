@@ -1,16 +1,11 @@
 """Tests for capture backends."""
 
-import pytest
-from pathlib import Path
-import tempfile
-import json
-
 from coherenceprobe.capture import (
-    LogCapture,
-    FileCapture,
     DecoratorCapture,
-    load_outputs_from_jsonl,
+    FileCapture,
+    LogCapture,
     load_outputs_from_directory,
+    load_outputs_from_jsonl,
 )
 from coherenceprobe.models import AgentOutput
 
@@ -121,17 +116,11 @@ def test_load_from_jsonl_with_blank_lines(tmp_path):
     """Test loading from JSONL with blank lines."""
     file_path = tmp_path / "outputs.jsonl"
 
-    output1 = AgentOutput(agent="a1", timestamp="2026-01-01T00:00:00Z",
-                         input="in", output="out1")
-    output2 = AgentOutput(agent="a2", timestamp="2026-01-01T00:00:01Z",
-                         input="in", output="out2")
+    output1 = AgentOutput(agent="a1", timestamp="2026-01-01T00:00:00Z", input="in", output="out1")
+    output2 = AgentOutput(agent="a2", timestamp="2026-01-01T00:00:01Z", input="in", output="out2")
 
     # Write with blank lines
-    file_path.write_text(
-        output1.model_dump_json() + "\n" +
-        "\n" +
-        output2.model_dump_json() + "\n"
-    )
+    file_path.write_text(output1.model_dump_json() + "\n" + "\n" + output2.model_dump_json() + "\n")
 
     outputs = load_outputs_from_jsonl(file_path)
     assert len(outputs) == 2

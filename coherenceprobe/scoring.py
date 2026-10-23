@@ -1,15 +1,12 @@
 """Coherence scoring and per-agent contribution analysis."""
 
 from collections import defaultdict
-from typing import Dict
 
-from .models import Claim, ContradictionPair, CoherenceReport, CoherenceConfig
+from .models import Claim, CoherenceConfig, CoherenceReport, ContradictionPair
 
 
 def compute_coherence_score(
-    claims: list[Claim],
-    contradictions: list[ContradictionPair],
-    config: CoherenceConfig
+    claims: list[Claim], contradictions: list[ContradictionPair], config: CoherenceConfig
 ) -> CoherenceReport:
     """Compute overall coherence score and per-agent contributions.
 
@@ -33,12 +30,12 @@ def compute_coherence_score(
             agent_scores={},
             contradictions=[],
             total_claims=len(claims),
-            total_agents=len(set(c.agent for c in claims)),
-            metadata={"note": "Insufficient claims for analysis"}
+            total_agents=len({c.agent for c in claims}),
+            metadata={"note": "Insufficient claims for analysis"},
         )
 
     # Count agents and claims per agent
-    agents = set(claim.agent for claim in claims)
+    agents = {claim.agent for claim in claims}
     claims_by_agent = defaultdict(list)
     for claim in claims:
         claims_by_agent[claim.agent].append(claim)
@@ -58,7 +55,7 @@ def compute_coherence_score(
             contradictions=[],
             total_claims=len(claims),
             total_agents=len(agents),
-            metadata={"note": "Only one agent, no cross-agent comparison possible"}
+            metadata={"note": "Only one agent, no cross-agent comparison possible"},
         )
 
     # Calculate weighted sum of contradictions
@@ -82,8 +79,8 @@ def compute_coherence_score(
         metadata={
             "total_pairs_checked": total_pairs,
             "weighted_contradictions": weighted_contradictions,
-            "claims_by_agent": {agent: len(claims_by_agent[agent]) for agent in agents}
-        }
+            "claims_by_agent": {agent: len(claims_by_agent[agent]) for agent in agents},
+        },
     )
 
     if config.verbose:
@@ -95,10 +92,8 @@ def compute_coherence_score(
 
 
 def _compute_agent_scores(
-    agents: set[str],
-    contradictions: list[ContradictionPair],
-    total_pairs: int
-) -> Dict[str, float]:
+    agents: set[str], contradictions: list[ContradictionPair], total_pairs: int
+) -> dict[str, float]:
     """Compute per-agent incoherence contribution scores.
 
     Each agent's score represents how much they contribute to overall incoherence,
@@ -114,7 +109,7 @@ def _compute_agent_scores(
         Dict mapping agent name to incoherence score (0.0-1.0)
     """
     # Count weighted contradictions per agent
-    agent_contradiction_weights = defaultdict(float)
+    agent_contradiction_weights: defaultdict[str, float] = defaultdict(float)
 
     for contradiction in contradictions:
         # Both agents in a contradiction share responsibility
@@ -169,9 +164,7 @@ def get_most_problematic_agent(report: CoherenceReport) -> tuple[str, float] | N
     return most_problematic
 
 
-def summarize_contradictions_by_type(
-    contradictions: list[ContradictionPair]
-) -> Dict[str, int]:
+def summarize_contradictions_by_type(contradictions: list[ContradictionPair]) -> dict[str, int]:
     """Summarize contradictions by type.
 
     Args:
@@ -180,7 +173,7 @@ def summarize_contradictions_by_type(
     Returns:
         Dict mapping contradiction type to count
     """
-    type_counts = defaultdict(int)
+    type_counts: defaultdict[str, int] = defaultdict(int)
     for contradiction in contradictions:
         type_counts[contradiction.contradiction_type] += 1
 
@@ -188,7 +181,7 @@ def summarize_contradictions_by_type(
 
 
 def get_contradiction_clusters(
-    contradictions: list[ContradictionPair]
+    contradictions: list[ContradictionPair],
 ) -> list[list[ContradictionPair]]:
     """Group contradictions into clusters by shared claims.
 
@@ -215,7 +208,7 @@ def get_contradiction_clusters(
         assigned.add(i)
 
         # Find related contradictions
-        for j, contradiction_b in enumerate(contradictions[i+1:], start=i+1):
+        for j, contradiction_b in enumerate(contradictions[i + 1 :], start=i + 1):
             if j in assigned:
                 continue
 

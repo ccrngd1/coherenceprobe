@@ -1,6 +1,7 @@
 """Core Pydantic models for CoherenceProbe."""
 
 from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -14,6 +15,7 @@ class AgentOutput(BaseModel):
         output: The agent's generated output
         metadata: Optional additional metadata (model version, tokens, etc.)
     """
+
     agent: str
     timestamp: str
     input: str
@@ -30,6 +32,7 @@ class Claim(BaseModel):
         normalized: Normalized version (stripped hedging, standardized refs)
         source_sentence: The original sentence from which this was extracted
     """
+
     agent: str
     text: str
     normalized: str
@@ -46,6 +49,7 @@ class ContradictionPair(BaseModel):
         confidence: NLI model confidence score (0-1)
         explanation: Optional human-readable explanation
     """
+
     claim_a: Claim
     claim_b: Claim
     contradiction_type: Literal["logical", "factual", "temporal"]
@@ -64,6 +68,7 @@ class CoherenceReport(BaseModel):
         total_agents: Number of agents analyzed
         metadata: Additional analysis metadata (timestamps, config, etc.)
     """
+
     score: float = Field(ge=0.0, le=1.0)
     agent_scores: dict[str, float]
     contradictions: list[ContradictionPair]
@@ -84,6 +89,7 @@ class CoherenceConfig(BaseModel):
         adjudicate_ambiguous: Use LLM to adjudicate ambiguous NLI cases
         verbose: Enable verbose logging output
     """
+
     model: str = "openai/gpt-4o-mini"
     threshold: float = Field(default=0.7, ge=0.0, le=1.0)
     local: bool = False

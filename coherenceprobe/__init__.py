@@ -19,32 +19,28 @@ Example usage:
 
 __version__ = "0.1.0"
 
+from .capture import (
+    CaptureBackend,
+    DecoratorCapture,
+    FileCapture,
+    LogCapture,
+    load_outputs_from_directory,
+    load_outputs_from_jsonl,
+)
+from .detection import adetect_contradictions, detect_contradictions
+from .extraction import aextract_claims, extract_claims
 from .models import (
     AgentOutput,
     Claim,
-    ContradictionPair,
-    CoherenceReport,
     CoherenceConfig,
+    CoherenceReport,
+    ContradictionPair,
 )
-
-from .capture import (
-    LogCapture,
-    FileCapture,
-    DecoratorCapture,
-    load_outputs_from_jsonl,
-    load_outputs_from_directory,
-)
-
-from .extraction import extract_claims, aextract_claims
-from .detection import detect_contradictions, adetect_contradictions
-from .scoring import compute_coherence_score
 from .reporting import format_report, save_report
+from .scoring import compute_coherence_score
 
 
-def check(
-    outputs: list[AgentOutput],
-    config: CoherenceConfig = None
-) -> CoherenceReport:
+def check(outputs: list[AgentOutput], config: CoherenceConfig | None = None) -> CoherenceReport:
     """Check coherence of agent outputs (main API).
 
     This is the primary synchronous function for checking coherence.
@@ -80,8 +76,7 @@ def check(
 
 
 async def acheck(
-    outputs: list[AgentOutput],
-    config: CoherenceConfig = None
+    outputs: list[AgentOutput], config: CoherenceConfig | None = None
 ) -> CoherenceReport:
     """Async version of check.
 
@@ -124,13 +119,13 @@ class capture:
         ...     report = check(c.get_outputs())
     """
 
-    def __init__(self, backend=None):
+    def __init__(self, backend: CaptureBackend | None = None):
         """Initialize capture context.
 
         Args:
             backend: Optional capture backend (defaults to LogCapture)
         """
-        self.backend = backend or LogCapture()
+        self.backend: CaptureBackend = backend or LogCapture()
 
     def __enter__(self):
         """Enter context."""
@@ -138,9 +133,8 @@ class capture:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Exit context."""
-        pass
 
-    def capture(self, agent: str, input_data: str, output: str, metadata: dict = None):
+    def capture(self, agent: str, input_data: str, output: str, metadata: dict | None = None):
         """Capture an agent output."""
         self.backend.capture(agent, input_data, output, metadata)
 
@@ -150,36 +144,25 @@ class capture:
 
 
 __all__ = [
-    # Version
-    "__version__",
-
-    # Models
     "AgentOutput",
     "Claim",
-    "ContradictionPair",
-    "CoherenceReport",
     "CoherenceConfig",
-
-    # Main API
-    "check",
-    "acheck",
-    "capture",
-
-    # Capture backends
-    "LogCapture",
-    "FileCapture",
+    "CoherenceReport",
+    "ContradictionPair",
     "DecoratorCapture",
-    "load_outputs_from_jsonl",
-    "load_outputs_from_directory",
-
-    # Individual pipeline stages (for advanced use)
-    "extract_claims",
-    "aextract_claims",
-    "detect_contradictions",
+    "FileCapture",
+    "LogCapture",
+    "__version__",
+    "acheck",
     "adetect_contradictions",
+    "aextract_claims",
+    "capture",
+    "check",
     "compute_coherence_score",
-
-    # Reporting
+    "detect_contradictions",
+    "extract_claims",
     "format_report",
+    "load_outputs_from_directory",
+    "load_outputs_from_jsonl",
     "save_report",
 ]

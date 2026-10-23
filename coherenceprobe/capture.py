@@ -1,18 +1,25 @@
 """Capture backends for collecting agent outputs."""
 
-import json
-from pathlib import Path
-from datetime import datetime
-from typing import Protocol, Callable, Any
+from collections.abc import Callable
+from datetime import datetime, timezone
 from functools import wraps
+from pathlib import Path
+from typing import Any, Protocol
 
 from .models import AgentOutput
+
+
+def _utc_timestamp() -> str:
+    """Return the current UTC time as an ISO8601 string with a 'Z' suffix."""
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 class CaptureBackend(Protocol):
     """Protocol for capture backends that collect agent outputs."""
 
-    def capture(self, agent: str, input_data: str, output: str, metadata: dict = None) -> None:
+    def capture(
+        self, agent: str, input_data: str, output: str, metadata: dict | None = None
+    ) -> None:
         """Capture a single agent output.
 
         Args:
@@ -44,14 +51,16 @@ class LogCapture:
     def __init__(self):
         self._outputs: list[AgentOutput] = []
 
-    def capture(self, agent: str, input_data: str, output: str, metadata: dict = None) -> None:
+    def capture(
+        self, agent: str, input_data: str, output: str, metadata: dict | None = None
+    ) -> None:
         """Capture a single agent output to memory."""
         agent_output = AgentOutput(
             agent=agent,
-            timestamp=datetime.utcnow().isoformat() + "Z",
+            timestamp=_utc_timestamp(),
             input=input_data,
             output=output,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
         self._outputs.append(agent_output)
 
@@ -76,14 +85,16 @@ class FileCapture:
         self.file_path = Path(file_path)
         self._outputs: list[AgentOutput] = []
 
-    def capture(self, agent: str, input_data: str, output: str, metadata: dict = None) -> None:
+    def capture(
+        self, agent: str, input_data: str, output: str, metadata: dict | None = None
+    ) -> None:
         """Capture a single agent output and append to JSONL file."""
         agent_output = AgentOutput(
             agent=agent,
-            timestamp=datetime.utcnow().isoformat() + "Z",
+            timestamp=_utc_timestamp(),
             input=input_data,
             output=output,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
         self._outputs.append(agent_output)
 
@@ -123,10 +134,10 @@ class DecoratorCapture:
         >>> outputs = capture.get_outputs()
     """
 
-    def __init__(self, backend: CaptureBackend = None):
+    def __init__(self, backend: CaptureBackend | None = None):
         self.backend = backend or LogCapture()
 
-    def agent(self, agent_name: str, metadata: dict = None):
+    def agent(self, agent_name: str, metadata: dict | None = None):
         """Decorator to capture agent function calls.
 
         Args:
@@ -136,6 +147,7 @@ class DecoratorCapture:
         Returns:
             Decorator function
         """
+
         def decorator(func: Callable) -> Callable:
             @wraps(func)
             def wrapper(*args, **kwargs) -> Any:
@@ -151,12 +163,13 @@ class DecoratorCapture:
                     agent=agent_name,
                     input_data=input_str,
                     output=output_str,
-                    metadata=metadata or {}
+                    metadata=metadata or {},
                 )
 
                 return result
 
             return wrapper
+
         return decorator
 
     def get_outputs(self) -> list[AgentOutput]:
@@ -204,10 +217,10 @@ def load_outputs_from_directory(dir_path: str | Path) -> list[AgentOutput]:
 
             agent_output = AgentOutput(
                 agent=agent_name,
-                timestamp=datetime.utcnow().isoformat() + "Z",
+                timestamp=_utc_timestamp(),
                 input="",  # Not available from file
                 output=output_text,
-                metadata={"source_file": str(file_path)}
+                metadata={"source_file": str(file_path)},
             )
             outputs.append(agent_output)
 

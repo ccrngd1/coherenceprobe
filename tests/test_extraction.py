@@ -1,8 +1,9 @@
 """Tests for claim extraction."""
 
 import pytest
-from coherenceprobe.extraction import extract_claims, _normalize_claim
-from coherenceprobe.models import AgentOutput, CoherenceConfig
+
+from coherenceprobe.extraction import _normalize_claim, extract_claims
+from coherenceprobe.models import AgentOutput
 
 
 def test_normalize_claim_removes_hedging():
@@ -34,7 +35,7 @@ def test_extract_claims_local_mode(local_config):
             timestamp="2026-01-01T00:00:00Z",
             input="test",
             output="The server runs on port 8080. The system is operational. It handles many requests.",
-            metadata={}
+            metadata={},
         )
     ]
 
@@ -55,7 +56,7 @@ def test_extract_claims_filters_questions(local_config):
             timestamp="2026-01-01T00:00:00Z",
             input="test",
             output="The port is 8080. What is the status? The system is up.",
-            metadata={}
+            metadata={},
         )
     ]
 
@@ -76,7 +77,7 @@ def test_extract_claims_filters_uncertainty(local_config):
             timestamp="2026-01-01T00:00:00Z",
             input="test",
             output="The port is 8080. Maybe the system is down. The server might be slow.",
-            metadata={}
+            metadata={},
         )
     ]
 
@@ -93,11 +94,7 @@ def test_extract_claims_empty_output(local_config):
 
     outputs = [
         AgentOutput(
-            agent="test",
-            timestamp="2026-01-01T00:00:00Z",
-            input="test",
-            output="",
-            metadata={}
+            agent="test", timestamp="2026-01-01T00:00:00Z", input="test", output="", metadata={}
         )
     ]
 
@@ -115,14 +112,14 @@ def test_extract_claims_multiple_agents(local_config):
             timestamp="2026-01-01T00:00:00Z",
             input="test",
             output="The port is 8080.",
-            metadata={}
+            metadata={},
         ),
         AgentOutput(
             agent="agent2",
             timestamp="2026-01-01T00:00:01Z",
             input="test",
             output="The system is operational.",
-            metadata={}
+            metadata={},
         ),
     ]
 

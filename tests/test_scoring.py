@@ -1,14 +1,13 @@
 """Tests for coherence scoring."""
 
-import pytest
+from coherenceprobe.models import Claim, CoherenceConfig, ContradictionPair
 from coherenceprobe.scoring import (
     compute_coherence_score,
-    rank_agents_by_coherence,
-    get_most_problematic_agent,
-    summarize_contradictions_by_type,
     get_contradiction_clusters,
+    get_most_problematic_agent,
+    rank_agents_by_coherence,
+    summarize_contradictions_by_type,
 )
-from coherenceprobe.models import Claim, ContradictionPair, CoherenceConfig
 
 
 def test_compute_score_no_contradictions():
@@ -39,10 +38,7 @@ def test_compute_score_with_contradictions():
 
     contradictions = [
         ContradictionPair(
-            claim_a=claim_a,
-            claim_b=claim_b,
-            contradiction_type="logical",
-            confidence=0.9
+            claim_a=claim_a, claim_b=claim_b, contradiction_type="logical", confidence=0.9
         )
     ]
 
@@ -91,12 +87,10 @@ def test_agent_scores_calculation():
     # a1 contradicts both a2 and a3
     contradictions = [
         ContradictionPair(
-            claim_a=claim_a1, claim_b=claim_a2,
-            contradiction_type="logical", confidence=0.8
+            claim_a=claim_a1, claim_b=claim_a2, contradiction_type="logical", confidence=0.8
         ),
         ContradictionPair(
-            claim_a=claim_a1, claim_b=claim_a3,
-            contradiction_type="factual", confidence=0.9
+            claim_a=claim_a1, claim_b=claim_a3, contradiction_type="factual", confidence=0.9
         ),
     ]
 
@@ -120,8 +114,7 @@ def test_rank_agents_by_coherence():
 
     contradictions = [
         ContradictionPair(
-            claim_a=claim_a2, claim_b=claim_a3,
-            contradiction_type="logical", confidence=0.9
+            claim_a=claim_a2, claim_b=claim_a3, contradiction_type="logical", confidence=0.9
         ),
     ]
 
@@ -145,8 +138,7 @@ def test_get_most_problematic_agent():
 
     contradictions = [
         ContradictionPair(
-            claim_a=claim_a1, claim_b=claim_a2,
-            contradiction_type="logical", confidence=0.9
+            claim_a=claim_a1, claim_b=claim_a2, contradiction_type="logical", confidence=0.9
         ),
     ]
 
@@ -165,16 +157,13 @@ def test_summarize_contradictions_by_type():
 
     contradictions = [
         ContradictionPair(
-            claim_a=claim_a, claim_b=claim_b,
-            contradiction_type="logical", confidence=0.8
+            claim_a=claim_a, claim_b=claim_b, contradiction_type="logical", confidence=0.8
         ),
         ContradictionPair(
-            claim_a=claim_a, claim_b=claim_b,
-            contradiction_type="logical", confidence=0.9
+            claim_a=claim_a, claim_b=claim_b, contradiction_type="logical", confidence=0.9
         ),
         ContradictionPair(
-            claim_a=claim_a, claim_b=claim_b,
-            contradiction_type="factual", confidence=0.7
+            claim_a=claim_a, claim_b=claim_b, contradiction_type="factual", confidence=0.7
         ),
     ]
 
@@ -192,12 +181,10 @@ def test_get_contradiction_clusters():
 
     contradictions = [
         ContradictionPair(
-            claim_a=claim_a, claim_b=claim_b,
-            contradiction_type="logical", confidence=0.8
+            claim_a=claim_a, claim_b=claim_b, contradiction_type="logical", confidence=0.8
         ),
         ContradictionPair(
-            claim_a=claim_b, claim_b=claim_c,
-            contradiction_type="logical", confidence=0.9
+            claim_a=claim_b, claim_b=claim_c, contradiction_type="logical", confidence=0.9
         ),
     ]
 

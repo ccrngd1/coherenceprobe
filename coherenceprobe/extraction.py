@@ -1,16 +1,12 @@
 """Claim extraction from agent outputs using LLM or local methods."""
 
-import re
 import json
-from typing import Optional
+import re
 
 from .models import AgentOutput, Claim, CoherenceConfig
 
 
-def extract_claims(
-    outputs: list[AgentOutput],
-    config: CoherenceConfig
-) -> list[Claim]:
+def extract_claims(outputs: list[AgentOutput], config: CoherenceConfig) -> list[Claim]:
     """Extract atomic factual claims from agent outputs.
 
     Args:
@@ -50,8 +46,7 @@ def _extract_claims_llm(output: AgentOutput, config: CoherenceConfig) -> list[Cl
         import litellm
     except ImportError:
         raise ImportError(
-            "litellm is required for LLM-based extraction. "
-            "Install with: pip install litellm"
+            "litellm is required for LLM-based extraction. " "Install with: pip install litellm"
         )
 
     prompt = f"""Extract all atomic factual claims from the following text. Each claim should be:
@@ -70,8 +65,11 @@ JSON array of claims:"""
         response = litellm.completion(
             model=config.model,
             messages=[
-                {"role": "system", "content": "You are an expert at extracting factual claims from text. Always respond with valid JSON."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": "You are an expert at extracting factual claims from text. Always respond with valid JSON.",
+                },
+                {"role": "user", "content": prompt},
             ],
             temperature=0.0,
         )
@@ -81,7 +79,7 @@ JSON array of claims:"""
         # Try to parse JSON - handle markdown code blocks if present
         if content.startswith("```"):
             # Extract JSON from markdown code block
-            match = re.search(r'```(?:json)?\s*\n?(.*?)\n?```', content, re.DOTALL)
+            match = re.search(r"```(?:json)?\s*\n?(.*?)\n?```", content, re.DOTALL)
             if match:
                 content = match.group(1)
 
@@ -91,16 +89,18 @@ JSON array of claims:"""
         for claim_text in claim_texts:
             normalized = _normalize_claim(claim_text)
             if normalized:  # Only add non-empty normalized claims
-                claims.append(Claim(
-                    agent=output.agent,
-                    text=claim_text,
-                    normalized=normalized,
-                    source_sentence=claim_text  # In LLM mode, claim is the source
-                ))
+                claims.append(
+                    Claim(
+                        agent=output.agent,
+                        text=claim_text,
+                        normalized=normalized,
+                        source_sentence=claim_text,  # In LLM mode, claim is the source
+                    )
+                )
 
         return claims
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - any LLM failure falls back to local extraction
         if config.verbose:
             print(f"LLM extraction failed for agent {output.agent}: {e}")
             print("Falling back to local extraction")
@@ -149,8 +149,15 @@ def _extract_claims_local(output: AgentOutput) -> list[Claim]:
 
         # Skip if contains high uncertainty markers
         uncertainty_markers = [
-            "might", "could", "possibly", "perhaps", "maybe",
-            "unclear", "uncertain", "unknown", "may be"
+            "might",
+            "could",
+            "possibly",
+            "perhaps",
+            "maybe",
+            "unclear",
+            "uncertain",
+            "unknown",
+            "may be",
         ]
         if any(marker in sentence_text.lower() for marker in uncertainty_markers):
             continue
@@ -163,12 +170,14 @@ def _extract_claims_local(output: AgentOutput) -> list[Claim]:
         # Normalize and create claim
         normalized = _normalize_claim(sentence_text)
         if normalized:
-            claims.append(Claim(
-                agent=output.agent,
-                text=sentence_text,
-                normalized=normalized,
-                source_sentence=sentence_text
-            ))
+            claims.append(
+                Claim(
+                    agent=output.agent,
+                    text=sentence_text,
+                    normalized=normalized,
+                    source_sentence=sentence_text,
+                )
+            )
 
     return claims
 
@@ -186,34 +195,31 @@ def _normalize_claim(claim_text: str) -> str:
 
     # Remove common hedging phrases at the start
     hedging_patterns = [
-        r'^I think that\s+',
-        r'^I believe that\s+',
-        r'^It seems that\s+',
-        r'^It appears that\s+',
-        r'^Possibly,?\s+',
-        r'^Perhaps,?\s+',
-        r'^Maybe,?\s+',
+        r"^I think that\s+",
+        r"^I believe that\s+",
+        r"^It seems that\s+",
+        r"^It appears that\s+",
+        r"^Possibly,?\s+",
+        r"^Perhaps,?\s+",
+        r"^Maybe,?\s+",
     ]
 
     for pattern in hedging_patterns:
-        text = re.sub(pattern, '', text, flags=re.IGNORECASE)
+        text = re.sub(pattern, "", text, flags=re.IGNORECASE)
 
     # Remove trailing punctuation for normalization
-    text = text.rstrip('.,;:!?')
+    text = text.rstrip(".,;:!?")
 
     # Convert to lowercase for comparison
     text = text.lower()
 
     # Remove extra whitespace
-    text = ' '.join(text.split())
+    text = " ".join(text.split())
 
     return text
 
 
-async def aextract_claims(
-    outputs: list[AgentOutput],
-    config: CoherenceConfig
-) -> list[Claim]:
+async def aextract_claims(outputs: list[AgentOutput], config: CoherenceConfig) -> list[Claim]:
     """Async version of extract_claims.
 
     Args:

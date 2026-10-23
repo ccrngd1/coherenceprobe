@@ -1,21 +1,17 @@
 """Report generation in multiple formats (JSON, text, HTML)."""
 
-import json
 from pathlib import Path
 from typing import Literal
 
-from .models import CoherenceReport, ContradictionPair
+from .models import CoherenceReport
 from .scoring import (
-    rank_agents_by_coherence,
     get_most_problematic_agent,
+    rank_agents_by_coherence,
     summarize_contradictions_by_type,
 )
 
 
-def format_report(
-    report: CoherenceReport,
-    format: Literal["json", "text", "html"] = "text"
-) -> str:
+def format_report(report: CoherenceReport, format: Literal["json", "text", "html"] = "text") -> str:
     """Format coherence report in the specified format.
 
     Args:
@@ -85,14 +81,18 @@ def format_text(report: CoherenceReport) -> str:
         for i, (agent, coherence) in enumerate(ranked, 1):
             incoherence = report.agent_scores[agent]
             status = "✓" if coherence >= 0.9 else "⚠" if coherence >= 0.7 else "✗"
-            lines.append(f"  {i}. {agent:20s} {status}  (coherence: {coherence:.3f}, incoherence: {incoherence:.3f})")
+            lines.append(
+                f"  {i}. {agent:20s} {status}  (coherence: {coherence:.3f}, incoherence: {incoherence:.3f})"
+            )
         lines.append("")
 
     # Most problematic agent
     if report.agent_scores:
         problematic = get_most_problematic_agent(report)
         if problematic and problematic[1] > 0.0:
-            lines.append(f"Most Problematic Agent: {problematic[0]} (incoherence: {problematic[1]:.3f})")
+            lines.append(
+                f"Most Problematic Agent: {problematic[0]} (incoherence: {problematic[1]:.3f})"
+            )
             lines.append("")
 
     # Detailed contradictions
@@ -103,7 +103,9 @@ def format_text(report: CoherenceReport) -> str:
         lines.append("")
 
         for i, contradiction in enumerate(report.contradictions, 1):
-            lines.append(f"Contradiction #{i} ({contradiction.contradiction_type}, confidence: {contradiction.confidence:.3f})")
+            lines.append(
+                f"Contradiction #{i} ({contradiction.contradiction_type}, confidence: {contradiction.confidence:.3f})"
+            )
             lines.append(f"  Agent A: {contradiction.claim_a.agent}")
             lines.append(f"    Claim: {contradiction.claim_a.text}")
             lines.append(f"  Agent B: {contradiction.claim_b.agent}")
@@ -223,7 +225,7 @@ def format_html(report: CoherenceReport) -> str:
 """)
 
     # Header
-    html_parts.append(f"""
+    html_parts.append("""
     <div class="header">
         <h1>🔍 CoherenceProbe Report</h1>
         <p>Multi-Agent Coherence Analysis</p>
@@ -231,7 +233,11 @@ def format_html(report: CoherenceReport) -> str:
 """)
 
     # Score card
-    score_class = "score-good" if report.score >= 0.8 else "score-warning" if report.score >= 0.5 else "score-bad"
+    score_class = (
+        "score-good"
+        if report.score >= 0.8
+        else "score-warning" if report.score >= 0.5 else "score-bad"
+    )
     html_parts.append(f"""
     <div class="score-card">
         <h2>Overall Coherence Score</h2>
@@ -249,7 +255,9 @@ def format_html(report: CoherenceReport) -> str:
         <ul>
 """)
         for ctype, count in sorted(type_counts.items()):
-            html_parts.append(f"            <li><strong>{ctype.capitalize()}:</strong> {count}</li>\n")
+            html_parts.append(
+                f"            <li><strong>{ctype.capitalize()}:</strong> {count}</li>\n"
+            )
         html_parts.append("""        </ul>
     </div>
 """)
@@ -275,7 +283,11 @@ def format_html(report: CoherenceReport) -> str:
         for i, (agent, coherence) in enumerate(ranked, 1):
             incoherence = report.agent_scores[agent]
             status = "✓" if coherence >= 0.9 else "⚠" if coherence >= 0.7 else "✗"
-            score_class = "score-good" if coherence >= 0.9 else "score-warning" if coherence >= 0.7 else "score-bad"
+            score_class = (
+                "score-good"
+                if coherence >= 0.9
+                else "score-warning" if coherence >= 0.7 else "score-bad"
+            )
             html_parts.append(f"""
                 <tr>
                     <td>{i}</td>
@@ -328,7 +340,11 @@ def format_html(report: CoherenceReport) -> str:
     return "".join(html_parts)
 
 
-def save_report(report: CoherenceReport, output_path: str | Path, format: str = None) -> None:
+def save_report(
+    report: CoherenceReport,
+    output_path: str | Path,
+    format: Literal["json", "text", "html"] | None = None,
+) -> None:
     """Save report to file.
 
     Args:
