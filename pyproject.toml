@@ -7,7 +7,7 @@ name = "coherenceprobe"
 version = "0.1.0"
 description = "Detect logical contradictions across multi-agent AI pipeline outputs"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "CoherenceProbe Contributors"}
@@ -18,7 +18,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -49,19 +48,20 @@ dev = [
     "pytest>=7.4.0",
     "pytest-asyncio>=0.21.0",
     "pytest-cov>=4.1.0",
-    "black>=23.0.0",
-    "ruff>=0.1.0",
-    "mypy>=1.7.0",
+    # Loose upper bounds: pinned to the major/minor lines CI was verified against
+    "black>=26,<27",
+    "ruff>=0.17,<0.18",
+    "mypy>=2.4,<3",
 ]
 
 [project.scripts]
 coherenceprobe = "coherenceprobe.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/ccrngd1/ProtoGensis/tree/main/coherenceprobe"
-Documentation = "https://github.com/ccrngd1/ProtoGensis/tree/main/coherenceprobe#readme"
-Repository = "https://github.com/ccrngd1/ProtoGensis/tree/main/coherenceprobe"
-Issues = "https://github.com/ccrngd1/ProtoGensis/issues"
+Homepage = "https://github.com/ccrngd1/coherenceprobe"
+Documentation = "https://github.com/ccrngd1/coherenceprobe#readme"
+Repository = "https://github.com/ccrngd1/coherenceprobe"
+Issues = "https://github.com/ccrngd1/coherenceprobe/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -69,14 +69,14 @@ include = ["coherenceprobe*"]
 
 [tool.black]
 line-length = 100
-target-version = ["py39", "py310", "py311", "py312"]
+target-version = ["py310", "py311", "py312"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py310"
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
