@@ -162,8 +162,10 @@ def _extract_claims_local(output: AgentOutput) -> list[Claim]:
         if any(marker in sentence_text.lower() for marker in uncertainty_markers):
             continue
 
-        # Check if sentence has a verb (indicates declarative statement)
-        has_verb = any(token.pos_ == "VERB" for token in sent)
+        # Check if sentence has a verbal predicate (indicates declarative statement).
+        # spaCy tags copulas and auxiliaries ("is", "are", "was") as AUX, not VERB,
+        # so copular claims like "The port is 8080" must also be accepted.
+        has_verb = any(token.pos_ in ("VERB", "AUX") for token in sent)
         if not has_verb:
             continue
 
